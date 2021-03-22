@@ -26,6 +26,22 @@ class Quaternion:
         return Quaternion(w, x, y, z)
     
     @classmethod
+    def make_from_euler(cls, roll = 0.0, pitch = 0.0, yaw = 0.0):
+        cy = math.cos(yaw * 0.5);
+        sy = math.sin(yaw * 0.5);
+        cp = math.cos(pitch * 0.5);
+        sp = math.sin(pitch * 0.5);
+        cr = math.cos(roll * 0.5);
+        sr = math.sin(roll * 0.5);
+
+        w = cr * cp * cy + sr * sp * sy;
+        x = sr * cp * cy - cr * sp * sy;
+        y = cr * sp * cy + sr * cp * sy;
+        z = cr * cp * sy - sr * sp * cy;
+
+        return Quaternion(w,x,y,z)
+
+    @classmethod
     def make_identity(cls):
         return Quaternion()
 
@@ -80,6 +96,16 @@ class Quaternion:
         theta_2 = math.atan2(self.w(), sin_theta_2)
         n = self.xyz() / sin_theta_2
         return theta_2 * n
+
+    def get_normal(self):
+        sin_theta_2 = (1 - self.w()**2)**0.5
+        n = self.xyz() / sin_theta_2
+        return n
+
+    def get_angle(self):
+        sin_theta_2 = (1 - self.w()**2)**0.5
+        theta_2 = math.atan2(self.w(), sin_theta_2)
+        return 2 * theta_2
 
     def rotate(self, vec):
         return vec + 2 * np.cross(self.xyz(), np.cross(self.xyz(), vec) + self.w() * vec)
