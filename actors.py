@@ -140,24 +140,24 @@ class AbstractThruster(Actor):
 
     def communicate(self):    
         if isinstance(self.parent, RigidBody):
-            self.parent.add_force_torque_model_frame(self.get_force_torque(), self.pose.position)
-          
+            self.parent.add_force_torque_model_frame(self.get_force_torque(), self.pose.position)     
 
-# class Thruster(AbstractThruster):
-#     def __init__(self, parent : 'Actor' = None, pose : 'Pose' = Pose()):
-#         super().__init__(parent, pose)
-#         self.thrust: float = 0.0
-#         self.torque: float = 0.0
-#         self.normal = np.array([1.0, 0.0, 0.0]) # local frame
 
-#     def get_force_torque(self):
-#         force = self.thrust * self.normal
-#         torque = self.torque * self.normal
-#         return ForceTorque(force, torque)
+class Thruster(AbstractThruster):
+    def __init__(self, parent : 'Actor' = None, pose : 'Pose' = Pose()):
+        super().__init__(parent, pose)
+        self.thrust: float = 0.0
+        self.torque: float = 0.0
+        self.normal = np.array([1.0, 0.0, 0.0]) # local frame
 
-#     def communicate(self):
-#         self.force_torque = ForceTorque(force=self.thrust * self.normal, torque= self.torque * self.normal)
-#         super().communicate()
+    def get_force_torque(self):
+        force = self.thrust * self.normal
+        torque = self.torque * self.normal
+        return ForceTorque(force, torque)
+
+    def communicate(self):
+        self.force_torque = ForceTorque(force=self.thrust * self.normal, torque= self.torque * self.normal)
+        super().communicate()
 
 class MoveToWayPointPoseController(Actor):
     '''
