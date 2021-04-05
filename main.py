@@ -80,27 +80,6 @@ if __name__ == '__main__':
         for key, scene_object in scene.items():
             if isinstance(scene_object, Actor):
                 scene_object.cleanup()
-
-        # # Apply waypointplanner to controller    
-        # for key, scene_object in scene.items():
-        #     if isinstance(scene_object, WayPointPlanner):
-        #         if isinstance(scene_object.parent, MoveToWayPointController):
-        #             scene_object.parent.target_position = scene_object.start
-
-        # # Apply controller to Thruster
-        # for key, scene_object in scene.items():
-        #     if isinstance(scene_object, MoveToWayPointController):
-        #         if isinstance(scene_object.parent, Thruster):
-        #             scene_object.parent.thrust = scene_object.custom_thrust
-        #             scene_object.parent.torque = scene_object.custom_torque
-        #             scene_object.parent.normal = scene_object.custom_normal
-        
-        # # Apply planner to controller
-        # for key, scene_object in scene.items():
-        #     if isinstance(scene_object, WayPointPlanner):
-        #         if isinstance(scene_object.parent, MoveToWayPointController):
-        #             scene_object.parent.
-
         t += dt
         if  (t > stop_time):
             simulation_is_running = False
