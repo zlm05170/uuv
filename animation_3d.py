@@ -22,7 +22,7 @@ def get_box(l, w, h, res):
         [0,0,0],
         [0,0,1],
         [0,1,1],
-        [0,1,0]]) - np.array([0.5,0.5,0.5]))* np.array([l,w,h])
+        [0,1,0]]) - np.array([0.5,0.5,0.5]))*np.array([l,w,h])
     return line
 
 def draw_motion(i, pose_series : List[Pose], line, shape):
@@ -35,10 +35,11 @@ def draw_motion(i, pose_series : List[Pose], line, shape):
     line.set_ydata(data[:,1])
     line.set_3d_properties(data[:,2])
 
-def animate_motion(pose_series, shape, space_x, space_y, space_z, dt):
+def draw_static_surf(fig, ax, points, tri):
+    return ax.plot_trisurf(points[0], points[1], points[2], triangles=tri.triangles,
+                color='#0fff0f80',edgecolors='#08ff0880',linewidths=0.5, antialiased=True)
+def animate_motion(fig, ax, pose_series, shape, space_x, space_y, space_z, dt):
     # Attaching 3D axis to the figure
-    fig = plt.figure()
-    ax = plt.axes(projection="3d")
     line, = ax.plot([], [], [], '-')
     # Number of iterations
     iterations = len(pose_series)
@@ -58,5 +59,4 @@ def animate_motion(pose_series, shape, space_x, space_y, space_z, dt):
     # Provide starting angle for the view.
     ax.view_init(25, 10)
 
-    ani = animation.FuncAnimation(fig, draw_motion, iterations, fargs=(pose_series, line, shape), interval=1000.0*dt, blit=False, repeat=True)
-    plt.show()
+    return animation.FuncAnimation(fig, draw_motion, iterations, fargs=(pose_series, line, shape), interval=1000.0*dt, blit=False, repeat=True)

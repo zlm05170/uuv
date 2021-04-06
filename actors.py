@@ -89,7 +89,7 @@ class RigidBody(Actor):
         # Integrate velocity to get position and rotation
         self.pose.position = self.pose.position + velocity_translational_world_frame * dt
         velocity_rotational_model_frame = world_to_model.rotate(velocity_rotational_world_frame)
-        self.pose.rotation = Quaternion.make_from_exp(velocity_rotational_model_frame * dt)**self.pose.rotation
+        self.pose.rotation = self.pose.rotation**Quaternion.make_from_exp(velocity_rotational_model_frame * dt*0.5)
 
     def cleanup(self):
         self.external_force_world_frame = np.zeros(3)
