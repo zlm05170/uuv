@@ -212,6 +212,7 @@ class WayPointPlanner(Actor): #
         self.fishnet_obs = None
         self.fishnet_space_mesh_data = None
         self.final_path = None
+        self.a_star_search_needed = True
 
     def get_uuv(self):
         if self.uuv == None:
@@ -238,9 +239,9 @@ class WayPointPlanner(Actor): #
 
     def a_star_search(self):
         # start = tuple(self.uuv_pos)
-        # goal = tuple(self.target_pose)
+        goal = tuple(self.target_pose.position)
         start = (2, 2, 6)
-        goal = (12, 13, 6)
+        # goal = (12, 13, 6)
         nx, ny, nz = (15, 15, 10)  # number of node in x,y,z directions
         xv, yv, zv = self.fishnet_space_mesh_data[0], self.fishnet_space_mesh_data[1], self.fishnet_space_mesh_data[2]
         is_obs = self.fishnet_obs
@@ -318,9 +319,16 @@ class WayPointPlanner(Actor): #
                             openSet_f.append(f[neighbor])
                             in_openSet[neighbor] = 1
 
+    def search_decision(self):
+        if self.final_path is not None:
+            self.a_star_search_needed = False
+
     def update(self, dt, t):
-        self.final_path = self.a_star_search()
-        super().update(dt, t)
+        self.search_decision()
+        if self.a_star_search_needed:
+            self.final_path = self.a_star_search()
+        # super().update(dt, t)
+
     def cleanup(self):
         pass
 

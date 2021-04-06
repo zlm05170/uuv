@@ -55,7 +55,7 @@ def draw_find_path(fig, ax, space_mesh_data, waypoint_series):
         node_x = []
         node_y = []
         node_z = []
-        for node in waypoint_series[0]:
+        for node in waypoint_series:
             print((node))
             node_x.append(xv[node])
             node_y.append(yv[node])
