@@ -2,6 +2,7 @@ from math_util import *
 import numpy as np
 from typing import List
 import random
+from itertools import product
 
 
 class Actor:
@@ -207,8 +208,10 @@ class WayPointPlanner(Actor): #
         pose: 'pose' = Pose()):
         super().__init__(parent, pose)
         self.target_pose = Pose()
-        self.uuv = None
+        self.uuv_pos = None
         self.fishnet_obs = None
+        self.fishnet_space_mesh_data = None
+        self.final_path = None
 
     def get_uuv(self):
         if self.uuv == None:
@@ -217,20 +220,107 @@ class WayPointPlanner(Actor): #
 
     def set_fishnet(self, fishnet: 'Fishnet'):
         self.fishnet_obs = fishnet.net_obstacle_points
-
+        self.fishnet_space_mesh_data = fishnet.space_mesh_data
+        
     def communicate(self):
         if isinstance(self.parent, MoveToWayPointPoseController):
             self.uuv_pos = self.parent.parent.parent.pose.position
-            print(self.uuv_pos)
-            
+    
+    @staticmethod
+    def reconstruct_path(cameFrom_x, cameFrom_y, cameFrom_z, goal):
+        path = [goal]
+        cur_node = goal
+        while not np.isinf(cameFrom_x[cur_node]):
+            cur_node = (int(cameFrom_x[cur_node]), int(cameFrom_y[cur_node]), int(cameFrom_z[cur_node]))
+            path.insert(0, cur_node)
+
+        return path
 
     def a_star_search(self):
-        pass
+        # start = tuple(self.uuv_pos)
+        # goal = tuple(self.target_pose)
+        start = (2, 2, 6)
+        goal = (12, 13, 6)
+        nx, ny, nz = (15, 15, 10)  # number of node in x,y,z directions
+        xv, yv, zv = self.fishnet_space_mesh_data[0], self.fishnet_space_mesh_data[1], self.fishnet_space_mesh_data[2]
+        is_obs = self.fishnet_obs
+
+        if any(x < y for x, y in zip(start, (0,0,0))) or \
+            any(x >= y for x, y in zip(start, (nx, ny, nz))) or \
+            is_obs[start] == 1 or \
+            any(x < y for x, y in zip(goal, (0, 0, 0))) or \
+            any(x >= y for x, y in zip(goal, (nx, ny, nz))) or \
+            is_obs[goal] == 1:
+            print('start or goal are either out of range, or inside the fish net')
+            return None
+
+        openSet = [start] # store the nodes that visited at the first time
+        openSet_f = [0] # store the f value of the corresponding node in openSet
+        in_openSet = np.zeros((nx, ny, nz)) # used to check if a node is in openset
+        in_openSet[start] = 1
+
+        g = np.inf * np.ones((nx, ny, nz))  # the cost of the cheapest path from start to g[i,j,k] currently known.
+        g[start] = 0
+
+        f = np.inf * np.ones((nx, ny, nz))  # f[i,j,k] is the heuristic guess of the cheapest path from start to goal via node [i,j,k]
+        f[start] = g[start] \
+                + np.linalg.norm(np.array([xv[goal],yv[goal],zv[goal]])-np.array([xv[start],yv[start],zv[start]]))
+
+        cameFrom_x = np.inf * np.ones((nx, ny, nz))  # cameFrom_x[i,j,k] is the parent node (in x direction) of node [i,j,k] with the cheapest cost
+        cameFrom_y = np.inf * np.ones((nx, ny, nz))
+        cameFrom_z = np.inf * np.ones((nx, ny, nz))
+
+        neighbor_idx = list(product([-1, 0, 1], repeat=3)) # the index of neighbors in 3D directions
+        neighbor_idx.remove((0,0,0))
+
+        while len(openSet) != 0:
+            openSet_f_min_idx = int(np.argmin(openSet_f))
+            cur_node = openSet[openSet_f_min_idx]
+            if cur_node == goal:
+                print('find goal')
+                return WayPointPlanner.reconstruct_path(cameFrom_x, cameFrom_y, cameFrom_z, goal)
+
+            del openSet[openSet_f_min_idx]
+            del openSet_f[openSet_f_min_idx]
+            in_openSet[cur_node] = 0
+
+            for n_idx in neighbor_idx:
+                neighbor = tuple(np.array(n_idx) + np.array(cur_node))
+                #print(neighbor)
+                #print(neighbor < (nx,ny,nz))
+                if all(x >= y for x, y in zip(neighbor, (0,0,0))) and \
+                        all(x < y for x, y in zip(neighbor, (nx,ny,nz))) and\
+                        is_obs[neighbor] == 0:  # ensure the neighbor is not out of scenario bounds and not an obstacle node
+                    if np.sign(goal[-1]- start[-1])==0:
+                        g_tmp = g[cur_node] \
+                                + np.linalg.norm(np.array([xv[neighbor], yv[neighbor], zv[neighbor]]) - np.array([xv[cur_node], yv[cur_node], zv[cur_node]]))
+                    else:
+                        if np.sign(goal[-1]- start[-1]) == np.sign(neighbor[-1] - cur_node[-1]):
+                            g_tmp = g[cur_node] \
+                                    + 2*np.linalg.norm(np.array([xv[neighbor], yv[neighbor], zv[neighbor]]) - np.array(
+                                                                [xv[cur_node], yv[cur_node], zv[cur_node]]))
+                        else:
+                            g_tmp = g[cur_node] \
+                                    + np.linalg.norm(np.array([xv[neighbor], yv[neighbor], zv[neighbor]]) - np.array(
+                                                            [xv[cur_node], yv[cur_node], zv[cur_node]]))
+
+                    if g_tmp < g[neighbor]:
+                        cameFrom_x[neighbor] = cur_node[0]
+                        cameFrom_y[neighbor] = cur_node[1]
+                        cameFrom_z[neighbor] = cur_node[2]
+
+                        g[neighbor] = g_tmp
+                        f[neighbor] = g[neighbor] +\
+                                    np.linalg.norm(np.array([xv[goal], yv[goal], zv[goal]]) - np.array([xv[cur_node], yv[cur_node], zv[cur_node]]))
+
+                        if in_openSet[neighbor] == 0:  # neighbor not in the openSet
+                            openSet.append(neighbor)
+                            openSet_f.append(f[neighbor])
+                            in_openSet[neighbor] = 1
 
     def update(self, dt, t):
-        # final_path = a_star_search(start_idx, end_idx, nx, ny, nz, xv, yv, zv, is_obs)
-        pass
-
+        self.final_path = self.a_star_search()
+        super().update(dt, t)
     def cleanup(self):
         pass
 

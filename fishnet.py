@@ -20,6 +20,7 @@ class Fishnet(Actor):
         self.net_mesh = None
         self.net_tri = None
         self.net_node = None
+        # the data will transfer to planner actor and gui
         self.space_mesh_data = self.space_mesh()
         self.net_obstacle_points = None
 

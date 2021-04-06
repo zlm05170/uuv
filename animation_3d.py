@@ -49,7 +49,21 @@ def draw_obs_point(fig, ax, space_mesh_data, is_obs):
                 elif is_obs[j][k][i] == 0.5:
                     ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, color='#ff9999ff', marker='o')
 
+def draw_find_path(fig, ax, space_mesh_data, waypoint_series):
+    xv, yv, zv = space_mesh_data[0], space_mesh_data[1], space_mesh_data[2]
+    if waypoint_series is not None:
+        node_x = []
+        node_y = []
+        node_z = []
+        for node in waypoint_series[0]:
+            print((node))
+            node_x.append(xv[node])
+            node_y.append(yv[node])
+            node_z.append(zv[node])
+        ax.plot(node_x, node_y, node_z, color='r')
+    
 def animate_motion(fig, ax, pose_series, shape, space_x, space_y, space_z, dt):
+
     # Attaching 3D axis to the figure
     line, = ax.plot([], [], [], '-')
     # Number of iterations
@@ -71,3 +85,4 @@ def animate_motion(fig, ax, pose_series, shape, space_x, space_y, space_z, dt):
     ax.view_init(25, 10)
 
     return animation.FuncAnimation(fig, draw_motion, iterations, fargs=(pose_series, line, shape), interval=1000.0*dt, blit=False, repeat=True)
+

@@ -100,6 +100,7 @@ return: if success, a list of node from start to goal; otherwise None
 note the meaning of f = g + h in A star algorithm
 '''
 def A_star_search(start, goal, nx, ny, nz, xv, yv, zv, is_obs):
+    print(type(start))
     if any(x < y for x, y in zip(start, (0,0,0))) or \
         any(x >= y for x, y in zip(start, (nx, ny, nz))) or \
         is_obs[start] == 1 or \
@@ -235,12 +236,12 @@ for i in range(np.size(is_obs, 2)):  # z direction
     for j in range(np.size(is_obs, 0)):  # x direction
         for k in range(np.size(is_obs, 1)):  # y direction
             if is_obs[j][k][i] == 1:
-                ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, c='b',marker='o')
+                ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, c='b', marker='o')
             elif is_obs[j][k][i] == 0.5:
                 ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, color='#ff9999ff', marker='o')
 
 
-start_idx = (2, 2, 6)
+start_idx = (0, 0, 0)
 end_idx = (12, 13, 6)
 
 if all(x >= y for x, y in zip(start_idx, (0,0,0))) and \

@@ -14,7 +14,7 @@ if __name__ == '__main__':
     fps = 60.0 # frame per second
     dt = 1.0/fps
     frame_count = 0
-    stop_time = 10
+    stop_time = 0.01
     simulation_is_running = True
 
     #%%
@@ -66,6 +66,7 @@ if __name__ == '__main__':
         ## Record phase
         pose_series.append(scene['uuv'].pose.copy())
         fishnet_pose_series.append(scene['fishnet'].pose.copy())
+        
         frame_count += 1
         
         ## Communicate
@@ -83,18 +84,20 @@ if __name__ == '__main__':
             if isinstance(scene_object, Actor):
                 scene_object.cleanup()
 
+        waypoint_series.append(scene['planner'].final_path)
         t += dt
         if  (t > stop_time):
             simulation_is_running = False
-    
+
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-  
+
     uuv_box = get_box(uuv_length, uuv_radius, uuv_radius, 5)
     uuv_anime = animate_motion(fig, ax, pose_series, uuv_box, 80, 80, 80, dt)
     fishnet_surf = draw_static_surf(fig, ax, scene['fishnet'].net_mesh, scene['fishnet'].net_tri)
     fishnet_obs = draw_obs_point(fig, ax, scene['fishnet'].space_mesh_data, scene['fishnet'].net_obstacle_points)
-    
+    find_path = draw_find_path(fig, ax, scene['fishnet'].space_mesh_data, waypoint_series)
+
     ax.set_xlim(-scene['fishnet'].scenario_len/2, scene['fishnet'].scenario_len/2)
     ax.set_ylim(-scene['fishnet'].scenario_wid/2, scene['fishnet'].scenario_wid/2)
     ax.set_zlim(-scene['fishnet'].scenario_height, 2)
