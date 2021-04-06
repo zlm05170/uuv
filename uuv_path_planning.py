@@ -40,7 +40,7 @@ value 0 indicating non-obstacle node, 0.5 means safe clearance node, 1 means an 
 def obs_check(xv, yv, zv, net_node, c_dist):
     obs = np.zeros(xv.shape)
     for i in range(np.size(xv, 2)): # z direction
-        d_projection = get_depth_polygon(zv[0][0][i], net_node)
+        d_projection = get_depth_polygon(zv[0][0][i], net_node) # 10*2
         obs_poly = Polygon(d_projection)
         for j in range(np.size(xv, 0)): # x direction
             for k in range(np.size(xv, 1)): # y direction
@@ -57,7 +57,7 @@ def obs_check(xv, yv, zv, net_node, c_dist):
     neighbor_idx = list(product([-1, 0, 1], repeat=3))  # the index of neighbors in 3D directions
     neighbor_idx.remove((0, 0, 0))
 
-    for m in range(1,c_dist+1):
+    for m in range(1, c_dist+1):
         for n_idx in neighbor_idx:
             c_offset = m*np.array(n_idx)
             #print(c_offset)
@@ -225,9 +225,9 @@ ax.set_zlim(-scenario_height, 2)
 #fig.colorbar(surf, shrink=0.5, aspect=5)
 
 #plot vertical line
-line_data = net_node[:,:,0] # 6*3*10
-# the initial point in each layer
-ax.scatter3D(line_data[:,0], line_data[:,1], line_data[:,2], s=40, c='r', marker='o')
+# line_data = net_node[:,:,0] # 6*3*10
+# # the initial point in each layer
+# ax.scatter3D(line_data[:,0], line_data[:,1], line_data[:,2], s=40, c='r', marker='o')
 
 # plot scatter of scenario nodes
 is_obs = obs_check(xv, yv, zv, net_node, 1)

@@ -36,8 +36,19 @@ def draw_motion(i, pose_series : List[Pose], line, shape):
     line.set_3d_properties(data[:,2])
 
 def draw_static_surf(fig, ax, points, tri):
-    return ax.plot_trisurf(points[0], points[1], points[2], triangles=tri.triangles,
-                color='#0fff0f80',edgecolors='#08ff0880',linewidths=0.5, antialiased=True)
+    ax.plot_trisurf(points[0], points[1], points[2], triangles=tri.triangles,
+            color='#0fff0f80',edgecolors='#08ff0880',linewidths=0.5, antialiased=True)
+
+def draw_obs_point(fig, ax, space_mesh_data, is_obs):
+    xv, yv, zv = space_mesh_data[0], space_mesh_data[1], space_mesh_data[2]
+    for i in range(np.size(is_obs, 2)):
+        for j in range(np.size(is_obs, 0)):  # x direction
+            for k in range(np.size(is_obs, 1)):  # y direction
+                if is_obs[j][k][i] == 1:
+                    ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, c='b',marker='o')
+                elif is_obs[j][k][i] == 0.5:
+                    ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, color='#ff9999ff', marker='o')
+
 def animate_motion(fig, ax, pose_series, shape, space_x, space_y, space_z, dt):
     # Attaching 3D axis to the figure
     line, = ax.plot([], [], [], '-')

@@ -159,6 +159,7 @@ class Thruster(AbstractThruster):
         self.force_torque = ForceTorque(force=self.thrust * self.normal, torque= self.torque * self.normal)
         super().communicate()
 
+
 class MoveToWayPointPoseController(Actor):
     '''
     This controller calculates the total ForceTorque required to move to way point
@@ -195,57 +196,10 @@ class MoveToWayPointPoseController(Actor):
                 self.current_angular_velocity = self.parent.parent.rotational_velocity
 
     def update(self, dt, t):
-
         desired_force_torque_in_world = self.get_commanded_force_torque_in_world()
         self.desired_force_torque_in_model.force = (~self.current_pose.rotation).rotate(desired_force_torque_in_world.force)
         self.desired_force_torque_in_model.torque = (~self.current_pose.rotation).rotate(desired_force_torque_in_world.torque)
         super().update(dt, t)
-
-
-    
-# class MoveToWayPointController(Actor):
-#     def __init__(self, parent : 'Thruster' = None, pose : 'Pose' = Pose()):
-#         super().__init__(parent, pose)
-#         self.custom_thrust = 0.0
-#         self.custom_torque = 0.0
-#         self.custom_normal = np.array([1.0, 0.0, 0.0]) # local frame
-#         self.target_velocity = 1.
-#         self.object_pose = Pose()
-#         self.object_velocity = np.array([0,0,0])
-#         self.object_angular_velocity = np.array([0,0,0])
-#         self.target_trajectory = []
-#         self.trajectory =0
-#         self.target_position = np.array([0,0,0])
-#         self.p1 = 5000
-#         self.p2 = 1000
-
-#     def move_to_pose(self, curr_pos, tar_pos):
-#         dist = np.linalg.norm(curr_pos-tar_pos)
-#         return dist
-        
-#     def update(self,dt, t):
-#         # The goal is to reach a constant velocity using PID
-
-#         # Implementation 1, only consider position and force, assume the thruster is at the cg of the uuv
-#         position_err = self.target_position - self.object_pose.position
-#         desired_force_in_world = position_err * self.p1
-#         desired_force_in_model = (~self.object_pose.rotation).rotate(desired_force_in_world)
-#         desired_force_magnitude = np.norm(desired_force_in_model)
-#         desired_force_normal = desired_force_in_model / desired_force_magnitude if desired_force_magnitude != 0.0 else np.array([1,0,0])
-#         self.custom_thrust = desired_force_in_model
-#         self.custom_normal = desired_force_normal
-#         self.custom_torque = 0
-
-        # Implementation 2, consider rotation and position, use force and torque, force and torque should have separate normal
-        # grand_parent = self.parent.parent
-        # if isinstance(grand_parent, RigidBody):
-        #     vel = grand_parent.velocity[0]       
-        #     pos = grand_parent.pose.position
-        #     dist = np.linalg.norm(pos-self.target_position)                                                 
-            
-        #     self.custom_thrust = (self.target_velocity - vel) * self.p1
-            
-
 
 # class WayPointPlanner(Actor): #
 #     def __init__(self, parent: 'MoveToWayPointController' = None, 

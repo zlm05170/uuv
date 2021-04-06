@@ -49,7 +49,6 @@ if __name__ == '__main__':
     scene['direct_controller'].pid_rotation = np.array([10000,0,15000])
     scene.update(fishnet = Fishnet(net_radius = 30, net_height = 30))
     scene['fishnet'].load_net_mesh('/home/luman/ws/uuv_planning/uuv/fish_net_10_5_0.5.xlsx')
-    scene['fishnet'].update_obstacle_points()
 
     pose_series = [] 
     fishnet_pose_series = [] 
@@ -84,11 +83,12 @@ if __name__ == '__main__':
     
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-
-    uuv_box = get_box(uuv_length, uuv_radius, uuv_radius, 5)
-    uuv_anime = animate_motion(fig, ax, pose_series, uuv_box, 80, 80, 80, dt)
+  
+    # uuv_box = get_box(uuv_length, uuv_radius, uuv_radius, 5)
+    # uuv_anime = animate_motion(fig, ax, pose_series, uuv_box, 80, 80, 80, dt)
     fishnet_surf = draw_static_surf(fig, ax, scene['fishnet'].net_mesh, scene['fishnet'].net_tri)
-
+    fishnet_obs = draw_obs_point(fig, ax, scene['fishnet'].space_mesh_data, scene['fishnet'].update_obstacle_points(1))
+    
     ax.set_xlim(-scene['fishnet'].scenario_len/2, scene['fishnet'].scenario_len/2)
     ax.set_ylim(-scene['fishnet'].scenario_wid/2, scene['fishnet'].scenario_wid/2)
     ax.set_zlim(-scene['fishnet'].scenario_height, 2)
