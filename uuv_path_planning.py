@@ -240,30 +240,30 @@ for i in range(np.size(is_obs, 2)):  # z direction
                 ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, color='#ff9999ff', marker='o')
 
 
-# start_idx = (2, 2, 6)
-# end_idx = (12, 13, 6)
+start_idx = (2, 2, 6)
+end_idx = (12, 13, 6)
 
-# if all(x >= y for x, y in zip(start_idx, (0,0,0))) and \
-#    all(x < y for x, y in zip(start_idx, (nx, ny, nz))):
-#     ax.scatter3D(xv[start_idx], yv[start_idx], zv[start_idx], s=20, c='m', marker='o')
-# else:
-#     print("start point is out of range")
-# if all(x >= y for x, y in zip(end_idx, (0,0,0))) and \
-#    all(x < y for x, y in zip(end_idx, (nx, ny, nz))):
-#     ax.scatter3D(xv[end_idx], yv[end_idx], zv[end_idx], s=20, color='#00ffffff', marker='x')
-# else:
-#     print("end point is out of range")
+if all(x >= y for x, y in zip(start_idx, (0,0,0))) and \
+   all(x < y for x, y in zip(start_idx, (nx, ny, nz))):
+    ax.scatter3D(xv[start_idx], yv[start_idx], zv[start_idx], s=20, c='m', marker='o')
+else:
+    print("start point is out of range")
+if all(x >= y for x, y in zip(end_idx, (0,0,0))) and \
+   all(x < y for x, y in zip(end_idx, (nx, ny, nz))):
+    ax.scatter3D(xv[end_idx], yv[end_idx], zv[end_idx], s=20, color='#00ffffff', marker='x')
+else:
+    print("end point is out of range")
 
-# final_path = A_star_search(start_idx, end_idx, nx, ny, nz, xv, yv, zv, is_obs)
-# if final_path is not None:
-#     node_x = []
-#     node_y = []
-#     node_z = []
-#     for node in final_path:
-#         print((node))
-#         node_x.append(xv[node])
-#         node_y.append(yv[node])
-#         node_z.append(zv[node])
-#     ax.plot(node_x, node_y, node_z, color='r')
+final_path = A_star_search(start_idx, end_idx, nx, ny, nz, xv, yv, zv, is_obs)
+if final_path is not None:
+    node_x = []
+    node_y = []
+    node_z = []
+    for node in final_path:
+        print((node))
+        node_x.append(xv[node])
+        node_y.append(yv[node])
+        node_z.append(zv[node])
+    ax.plot(node_x, node_y, node_z, color='r')
 
 plt.show()

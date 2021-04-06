@@ -1,5 +1,6 @@
 from fishnet import Fishnet
 from actors import *
+from math_util import *
 from animation_3d import *
 import matplotlib.pyplot as plt
 import numpy as np
@@ -47,8 +48,14 @@ if __name__ == '__main__':
     scene['direct_controller'].target_pose = Pose(position=[15,15,0], rotation=Quaternion.make_from_euler(pitch = math.radians(15), yaw=math.radians(45)))
     scene['direct_controller'].pid_position = np.array([1000,0,100])
     scene['direct_controller'].pid_rotation = np.array([10000,0,15000])
+
     scene.update(fishnet = Fishnet(net_radius = 30, net_height = 30))
     scene['fishnet'].load_net_mesh('/home/luman/ws/uuv_planning/uuv/fish_net_10_5_0.5.xlsx')
+    scene['fishnet'].update_obstacle_points(1)
+
+    scene.update(planner = WayPointPlanner(parent = scene['direct_controller']))
+    scene['planner'].target_pose = Pose(position = [12,13,6], rotation = Quaternion.make_from_euler(pitch = math.radians(0), yaw=math.radians(0))) 
+    scene['planner'].set_fishnet(scene['fishnet'])
 
     pose_series = [] 
     fishnet_pose_series = [] 
@@ -80,14 +87,13 @@ if __name__ == '__main__':
         if  (t > stop_time):
             simulation_is_running = False
     
-    
     fig = plt.figure()
     ax = fig.gca(projection='3d')
   
-    # uuv_box = get_box(uuv_length, uuv_radius, uuv_radius, 5)
-    # uuv_anime = animate_motion(fig, ax, pose_series, uuv_box, 80, 80, 80, dt)
+    uuv_box = get_box(uuv_length, uuv_radius, uuv_radius, 5)
+    uuv_anime = animate_motion(fig, ax, pose_series, uuv_box, 80, 80, 80, dt)
     fishnet_surf = draw_static_surf(fig, ax, scene['fishnet'].net_mesh, scene['fishnet'].net_tri)
-    fishnet_obs = draw_obs_point(fig, ax, scene['fishnet'].space_mesh_data, scene['fishnet'].update_obstacle_points(1))
+    fishnet_obs = draw_obs_point(fig, ax, scene['fishnet'].space_mesh_data, scene['fishnet'].net_obstacle_points)
     
     ax.set_xlim(-scene['fishnet'].scenario_len/2, scene['fishnet'].scenario_len/2)
     ax.set_ylim(-scene['fishnet'].scenario_wid/2, scene['fishnet'].scenario_wid/2)

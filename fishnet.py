@@ -111,5 +111,5 @@ class Fishnet(Actor):
                                                         c_dist: c_dist+xv.shape[1],
                                                         c_dist: c_dist+xv.shape[2]]).astype(float)
         obs = obs + 0.5 * obs_clear_result
-        return obs
+        self.net_obstacle_points = obs
 

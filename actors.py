@@ -3,6 +3,7 @@ import numpy as np
 from typing import List
 import random
 
+
 class Actor:
 
     def __init__(self, parent : 'Actor' = None, pose : 'Pose' = Pose()):
@@ -201,97 +202,35 @@ class MoveToWayPointPoseController(Actor):
         self.desired_force_torque_in_model.torque = (~self.current_pose.rotation).rotate(desired_force_torque_in_world.torque)
         super().update(dt, t)
 
-# class WayPointPlanner(Actor): #
-#     def __init__(self, parent: 'MoveToWayPointController' = None, 
-#         pose: 'pose' = Pose(), 
-#         obstacle_list = np.zeros((2,4)), 
-#         goal_sample_rate = 0.,
-#         max_iter = 0.,
-#         rand_area = np.zeros((3,2))):
+class WayPointPlanner(Actor): #
+    def __init__(self, parent: 'MoveToWayPointController' = None, 
+        pose: 'pose' = Pose()):
+        super().__init__(parent, pose)
+        self.target_pose = Pose()
+        self.uuv = None
+        self.fishnet_obs = None
 
-# class MoveToWayPointController(Actor):
-#     def __init__(self, parent : 'Thruster' = None, pose : 'Pose' = Pose()):
-#         super().__init__(parent, pose)
-#         self.custom_thrust = 0.0
-#         self.custom_torque = 0.0
-#         self.custom_normal = np.array([1.0, 0.0, 0.0]) # local frame
-#         self.target_velocity = 1.
-#         self.object_pose = Pose()
-#         self.object_velocity = np.array([0,0,0])
-#         self.object_angular_velocity = np.array([0,0,0])
-#         self.target_trajectory = []
-#         self.trajectory =0
-#         self.target_position = np.array([0,0,0])
-#         self.p1 = 5000
-#         self.p2 = 1000
+    def get_uuv(self):
+        if self.uuv == None:
+            self.uuv = self.parent.parent.parent
+        return self.uuv
 
-#     def move_to_pose(self, curr_pos, tar_pos):
-#         dist = np.linalg.norm(curr_pos-tar_pos)
-#         return dist
-        
-#     def update(self,dt, t):
-#         # The goal is to reach a constant velocity using PID
+    def set_fishnet(self, fishnet: 'Fishnet'):
+        self.fishnet_obs = fishnet.net_obstacle_points
 
-#         # Implementation 1, only consider position and force, assume the thruster is at the cg of the uuv
-#         position_err = self.target_position - self.object_pose.position
-#         desired_force_in_world = position_err * self.p1
-#         desired_force_in_model = (~self.object_pose.rotation).rotate(desired_force_in_world)
-#         desired_force_magnitude = np.norm(desired_force_in_model)
-#         desired_force_normal = desired_force_in_model / desired_force_magnitude if desired_force_magnitude != 0.0 else np.array([1,0,0])
-#         self.custom_thrust = desired_force_in_model
-#         self.custom_normal = desired_force_normal
-#         self.custom_torque = 0
-
-#         # Implementation 2, consider rotation and position, use force and torque, force and torque should have separate normal
-#         # grand_parent = self.parent.parent
-#         # if isinstance(grand_parent, RigidBody):
-#         #     vel = grand_parent.velocity[0]       
-#         #     pos = grand_parent.pose.position
-#         #     dist = np.linalg.norm(pos-self.target_position)                                                 
-            
-#         #     self.custom_thrust = (self.target_velocity - vel) * self.p1
+    def communicate(self):
+        if isinstance(self.parent, MoveToWayPointPoseController):
+            self.uuv_pos = self.parent.parent.parent.pose.position
+            print(self.uuv_pos)
             
 
-# 0])
-#         self.obstacle_list = obstacle_list
-#         self.goal_sample_rate = goal_sample_rate
-#         self.max_iter = max_iter
-#         self.rand_area = rand_area
-#         self.node_list = [self.start]
-#         self.Node = np.zeros(3)
-#         self.min_rand_x =rand_area[0][0]
-#         self.max_rand_x =rand_area[0][1]
-#         self.min_rand_y =rand_area[1][0]
-#         self.max_rand_y =rand_area[1][1]
-#         self.min_rand_z =rand_area[2][0]
-#         self.max_rand_z =rand_area[2][1]
-  
-#     @staticmethod
-#     def get_nearest_node_index(node_list, rnd_node):
-#         dlist = [(node.x - rnd_node.x)**2 + (node.y - rnd_node.y)**2 +(node.z - rnd_node.z)**2
-#                  for node in node_list]
-#         minind = dlist.index(min(dlist))
-#         return minind
+    def a_star_search(self):
+        pass
 
-#     def get_random_node(self):
-#         if random.randint(0, 100) > self.goal_sample_rate:
-#             rnd = self.Node([random.uniform(self.min_rand_x, self.max_rand_x),
-#                 random.uniform(self.min_rand_y, self.max_rand_y),
-#                 random.uniform(self.min_rand_z, self.max_rand_z)])
-            
-#         else:  # goal point sampling
-#             rnd = self.Node([self.goal[0], self.goal[1], self.goal[2]])
-#         return rnd
+    def update(self, dt, t):
+        # final_path = a_star_search(start_idx, end_idx, nx, ny, nz, xv, yv, zv, is_obs)
+        pass
 
-#     def planning(self):
-#         for i in range(self.max_iter):
-#             self.Node = self.get_random_node()
-
-
-#     # def update(self, dt, t):
-#     #     self.trajectory = [np.random.rand(3) for i in []]
-
-
-    
-
+    def cleanup(self):
+        pass
 
