@@ -39,8 +39,10 @@ def draw_static_surf(fig, ax, points, tri):
     ax.plot_trisurf(points[0], points[1], points[2], triangles=tri.triangles,
             color='#0fff0f80',edgecolors='#08ff0880',linewidths=0.5, antialiased=True)
 
-def draw_obs_point(fig, ax, space_mesh_data, is_obs):
+def draw_obs_point(fig, ax, start_idx, end_idx, space_mesh_data, is_obs):
     xv, yv, zv = space_mesh_data[0], space_mesh_data[1], space_mesh_data[2]
+    ax.scatter3D(xv[start_idx], yv[start_idx], zv[start_idx], s=20, c='m', marker='o')
+    ax.scatter3D(xv[end_idx], yv[end_idx], zv[end_idx], s=20, color='#00ffffff', marker='x')
     for i in range(np.size(is_obs, 2)):
         for j in range(np.size(is_obs, 0)):  # x direction
             for k in range(np.size(is_obs, 1)):  # y direction
@@ -49,17 +51,15 @@ def draw_obs_point(fig, ax, space_mesh_data, is_obs):
                 elif is_obs[j][k][i] == 0.5:
                     ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, color='#ff9999ff', marker='o')
 
-def draw_find_path(fig, ax, space_mesh_data, waypoint_series):
-    xv, yv, zv = space_mesh_data[0], space_mesh_data[1], space_mesh_data[2]
+def draw_find_path(fig, ax, waypoint_series):
     if waypoint_series is not None:
         node_x = []
         node_y = []
         node_z = []
         for node in waypoint_series:
-            print((node))
-            node_x.append(xv[node])
-            node_y.append(yv[node])
-            node_z.append(zv[node])
+            node_x.append(node[0])
+            node_y.append(node[1])
+            node_z.append(node[2])
         ax.plot(node_x, node_y, node_z, color='r')
     
 def animate_motion(fig, ax, pose_series, shape, space_x, space_y, space_z, dt):

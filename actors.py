@@ -1,9 +1,9 @@
+from shapely.geometry.base import EMPTY
 from math_util import *
 import numpy as np
 from typing import List
 import random
 from itertools import product
-
 
 class Actor:
 
@@ -178,7 +178,6 @@ class MoveToWayPointPoseController(Actor):
         self.desired_force_torque_in_model = ForceTorque()
 
     def get_commanded_force_torque_in_world(self):
-
         # Implementation 1: direct 6DOF PID control
         position_error = self.target_pose.position - self.current_pose.position # difference of current position to target position
         rotation_error = self.target_pose.rotation ** ~self.current_pose.rotation # difference of current rotation to target rotation, in quaternion
@@ -203,6 +202,7 @@ class MoveToWayPointPoseController(Actor):
         self.desired_force_torque_in_model.torque = (~self.current_pose.rotation).rotate(desired_force_torque_in_world.torque)
         super().update(dt, t)
 
+
 class WayPointPlanner(Actor): #
     def __init__(self, parent: 'MoveToWayPointController' = None, 
         pose: 'pose' = Pose()):
@@ -211,21 +211,31 @@ class WayPointPlanner(Actor): #
         self.uuv_pos = None
         self.fishnet_obs = None
         self.fishnet_space_mesh_data = None
-        self.final_path = None
+        self.final_path = []
         self.a_star_search_needed = True
-
-    def get_uuv(self):
-        if self.uuv == None:
-            self.uuv = self.parent.parent.parent
-        return self.uuv
-
+        self.current_path_point_target_index = 0
+    
     def set_fishnet(self, fishnet: 'Fishnet'):
         self.fishnet_obs = fishnet.net_obstacle_points
         self.fishnet_space_mesh_data = fishnet.space_mesh_data
-        
+    
+    def point_is_reached(self, target_point, current_point):
+        return np.linalg.norm(target_point - current_point) < 0.1
+
+    def instruct_controller(self):
+        if self.point_is_reached(self.final_path[self.current_path_point_target_index], self.uuv_pos):
+            if self.current_path_point_target_index < len(self.final_path)-1:
+                self.current_path_point_target_index += 1
+        return self.final_path[self.current_path_point_target_index]
+
     def communicate(self):
         if isinstance(self.parent, MoveToWayPointPoseController):
             self.uuv_pos = self.parent.parent.parent.pose.position
+            # if self.final_path is not None:               
+            if len(self.final_path) != 0:
+                tmp = self.instruct_controller()
+                self.parent.target_pose.position = tmp 
+                         
     
     @staticmethod
     def reconstruct_path(cameFrom_x, cameFrom_y, cameFrom_z, goal):
@@ -238,10 +248,11 @@ class WayPointPlanner(Actor): #
         return path
 
     def a_star_search(self):
-        # start = tuple(self.uuv_pos)
+        # start = tuple(self.uuv_pos)     
+        start_idx = (7, 10, 6)
+        end_idx = (12, 13, 6)
+        start = (7, 10, 6)
         goal = tuple(self.target_pose.position)
-        start = (2, 2, 6)
-        # goal = (12, 13, 6)
         nx, ny, nz = (15, 15, 10)  # number of node in x,y,z directions
         xv, yv, zv = self.fishnet_space_mesh_data[0], self.fishnet_space_mesh_data[1], self.fishnet_space_mesh_data[2]
         is_obs = self.fishnet_obs
@@ -278,7 +289,7 @@ class WayPointPlanner(Actor): #
             openSet_f_min_idx = int(np.argmin(openSet_f))
             cur_node = openSet[openSet_f_min_idx]
             if cur_node == goal:
-                print('find goal')
+                # print('find goal')
                 return WayPointPlanner.reconstruct_path(cameFrom_x, cameFrom_y, cameFrom_z, goal)
 
             del openSet[openSet_f_min_idx]
@@ -320,15 +331,21 @@ class WayPointPlanner(Actor): #
                             in_openSet[neighbor] = 1
 
     def search_decision(self):
-        if self.final_path is not None:
+        if len(self.final_path) != 0:
             self.a_star_search_needed = False
+        else:
+            self.a_star_search_needed = True
 
     def update(self, dt, t):
+        super().update(dt, t)
+        xv, yv, zv = self.fishnet_space_mesh_data[0], self.fishnet_space_mesh_data[1], self.fishnet_space_mesh_data[2]
         self.search_decision()
         if self.a_star_search_needed:
-            self.final_path = self.a_star_search()
-        # super().update(dt, t)
-
+            final_path_index = self.a_star_search()
+            for node in final_path_index:
+                self.final_path.append([xv[node],yv[node],zv[node]])
+            print(self.final_path)
+        
     def cleanup(self):
         pass
 

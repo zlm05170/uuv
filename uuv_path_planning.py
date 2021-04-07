@@ -232,17 +232,20 @@ ax.set_zlim(-scenario_height, 2)
 
 # plot scatter of scenario nodes
 is_obs = obs_check(xv, yv, zv, net_node, 1)
-for i in range(np.size(is_obs, 2)):  # z direction
-    for j in range(np.size(is_obs, 0)):  # x direction
-        for k in range(np.size(is_obs, 1)):  # y direction
-            if is_obs[j][k][i] == 1:
-                ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, c='b', marker='o')
-            elif is_obs[j][k][i] == 0.5:
-                ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, color='#ff9999ff', marker='o')
+# for i in range(np.size(is_obs, 2)):  # z direction
+#     for j in range(np.size(is_obs, 0)):  # x direction
+#         for k in range(np.size(is_obs, 1)):  # y direction
+#             if is_obs[j][k][i] == 1:
+#                 ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, c='b', marker='o')
+#             elif is_obs[j][k][i] == 0.5:
+#                 ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, color='#ff9999ff', marker='o')
 
 
-start_idx = (0, 0, 0)
+start_idx = (7, 10, 6)
 end_idx = (12, 13, 6)
+print(xv[start_idx], yv[start_idx], zv[start_idx])
+print(xv[end_idx], yv[end_idx], zv[end_idx])
+
 
 if all(x >= y for x, y in zip(start_idx, (0,0,0))) and \
    all(x < y for x, y in zip(start_idx, (nx, ny, nz))):
@@ -256,12 +259,13 @@ else:
     print("end point is out of range")
 
 final_path = A_star_search(start_idx, end_idx, nx, ny, nz, xv, yv, zv, is_obs)
+
 if final_path is not None:
     node_x = []
     node_y = []
     node_z = []
     for node in final_path:
-        print((node))
+        # print((node))
         node_x.append(xv[node])
         node_y.append(yv[node])
         node_z.append(zv[node])
