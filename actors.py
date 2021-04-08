@@ -1,3 +1,4 @@
+from matplotlib.colors import PowerNorm
 from shapely.geometry.base import EMPTY
 from math_util import *
 import numpy as np
@@ -207,6 +208,7 @@ class WayPointPlanner(Actor): #
     def __init__(self, parent: 'MoveToWayPointController' = None, 
         pose: 'pose' = Pose()):
         super().__init__(parent, pose)
+        self.start_pose = Pose()
         self.target_pose = Pose()
         self.uuv_pos = None
         self.fishnet_obs = None
@@ -230,8 +232,7 @@ class WayPointPlanner(Actor): #
 
     def communicate(self):
         if isinstance(self.parent, MoveToWayPointPoseController):
-            self.uuv_pos = self.parent.parent.parent.pose.position
-            # if self.final_path is not None:               
+            self.uuv_pos = self.parent.parent.parent.pose.position              
             if len(self.final_path) != 0:
                 tmp = self.instruct_controller()
                 self.parent.target_pose.position = tmp 
@@ -247,14 +248,14 @@ class WayPointPlanner(Actor): #
 
         return path
 
-    def a_star_search(self):
-        # start = tuple(self.uuv_pos)     
-        start_idx = (7, 10, 6)
-        end_idx = (12, 13, 6)
+    def a_star_search(self):   
         start = (7, 10, 6)
-        goal = tuple(self.target_pose.position)
+        goal = (12, 13, 6)
+    
         nx, ny, nz = (15, 15, 10)  # number of node in x,y,z directions
         xv, yv, zv = self.fishnet_space_mesh_data[0], self.fishnet_space_mesh_data[1], self.fishnet_space_mesh_data[2]
+        # start = self.start_pose.position
+        # goal = self.target_pose.position
         is_obs = self.fishnet_obs
 
         if any(x < y for x, y in zip(start, (0,0,0))) or \

@@ -39,10 +39,11 @@ def draw_static_surf(fig, ax, points, tri):
     ax.plot_trisurf(points[0], points[1], points[2], triangles=tri.triangles,
             color='#0fff0f80',edgecolors='#08ff0880',linewidths=0.5, antialiased=True)
 
-def draw_obs_point(fig, ax, start_idx, end_idx, space_mesh_data, is_obs):
+def draw_obs_point(fig, ax, start, goal, space_mesh_data, is_obs):
     xv, yv, zv = space_mesh_data[0], space_mesh_data[1], space_mesh_data[2]
-    ax.scatter3D(xv[start_idx], yv[start_idx], zv[start_idx], s=20, c='m', marker='o')
-    ax.scatter3D(xv[end_idx], yv[end_idx], zv[end_idx], s=20, color='#00ffffff', marker='x')
+    ax.scatter3D(start[0], start[1], start[2], s=20, c='m', marker='o')
+    ax.scatter3D(goal[0], goal[1], goal[2], s=20, color='#00ffffff', marker='x')
+
     for i in range(np.size(is_obs, 2)):
         for j in range(np.size(is_obs, 0)):  # x direction
             for k in range(np.size(is_obs, 1)):  # y direction

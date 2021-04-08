@@ -25,7 +25,8 @@ if __name__ == '__main__':
     # Reference point of the UUV is at aft center
     uuv_length = 15.0
     uuv_radius = 2.0
-    scene.update(uuv = RigidBody(pose=Pose(position=[0.0,32.14,-20.0],rotation = Quaternion.make_from_euler(pitch = math.radians(0), yaw=math.radians(0))), mass = 113.2, moment_of_inertia=[[6100, 0,0,], [0,5970, 0], [0,0,9590]]))
+    start, goal = [0.0,32.14,-20.0], [53.57, 64.28, -20.0]
+    scene.update(uuv = RigidBody(pose=Pose(position=start,rotation = Quaternion.make_from_euler(pitch = math.radians(0), yaw=math.radians(0))), mass = 113.2, moment_of_inertia=[[6100, 0,0,], [0,5970, 0], [0,0,9590]]))
     scene.update(uuv_hydro = HydrodynamicResponseActor(
         parent = scene['uuv'],
         damping=[
@@ -54,7 +55,8 @@ if __name__ == '__main__':
     scene['fishnet'].update_obstacle_points(1)
 
     scene.update(planner = WayPointPlanner(parent = scene['direct_controller']))
-    scene['planner'].target_pose = Pose(position=[11,13,6], rotation = Quaternion.make_from_euler(pitch = math.radians(0), yaw=math.radians(0)))  # 53.571428571428555 64.28571428571428 -20.0
+    scene['planner'].start_pose = Pose(position=start)  # 53.571428571428555 64.28571428571428 -20.0
+    scene['planner'].target_pose = Pose(position=goal)  # 53.571428571428555 64.28571428571428 -20.0
     scene['planner'].set_fishnet(scene['fishnet'])
 
     pose_series = [] 
@@ -91,10 +93,11 @@ if __name__ == '__main__':
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     print(scene['planner'].final_path)
+
     uuv_box = get_box(uuv_length, uuv_radius, uuv_radius, 5)
     uuv_anime = animate_motion(fig, ax, pose_series, uuv_box, 80, 80, 80, dt)
     # fishnet_surf = draw_static_surf(fig, ax, scene['fishnet'].net_mesh, scene['fishnet'].net_tri)
-    # fishnet_obs = draw_obs_point(fig, ax, (7, 10, 6), (11,13,6), scene['fishnet'].space_mesh_data, scene['fishnet'].net_obstacle_points)
+    # fishnet_obs = draw_obs_point(fig, ax, start, goal, scene['fishnet'].space_mesh_data, scene['fishnet'].net_obstacle_points)
     find_path = draw_find_path(fig, ax, scene['planner'].final_path)
 
     ax.set_xlim(-scene['fishnet'].scenario_len/2, scene['fishnet'].scenario_len/2)
