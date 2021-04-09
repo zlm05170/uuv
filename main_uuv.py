@@ -59,6 +59,8 @@ if __name__ == '__main__':
     scene['planner'].target_pose = Pose(position=goal)  # 53.571428571428555 64.28571428571428 -20.0
     scene['planner'].set_fishnet(scene['fishnet'])
 
+    # scene.update(helixplanner = HelixPlanner(parent = scene['direct_controller']))
+
     pose_series = [] 
     fishnet_pose_series = [] 
     waypoint_series = []

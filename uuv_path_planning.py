@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy import interpolate
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.tri import Triangulation
 from matplotlib import cm
@@ -211,14 +212,14 @@ tri = Triangulation(np.ravel(mv), np.ravel(nv))
 net_node_x = np.ravel(net_node_ext[0,:])
 net_node_y = np.ravel(net_node_ext[1,:])
 net_node_z = np.ravel(net_node_ext[2,:])
-print(net_node_x.shape)
+
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-#surf = ax.plot_trisurf(net_node_x, net_node_y, net_node_z, triangles=tri.triangles,
-#                cmap='viridis', linewidths=0.0, antialiased=True)
-#surf = ax.plot_wireframe(net_node_x, net_node_y, net_node_z, rstride=10, cstride=10)
 surf = ax.plot_trisurf(net_node_x, net_node_y, net_node_z, triangles=tri.triangles,
-                color='#0fff0f80',edgecolors='#08ff0880',linewidths=0.5, antialiased=True)
+               cmap='viridis', linewidths=0.0, antialiased=True)
+#surf = ax.plot_wireframe(net_node_x, net_node_y, net_node_z, rstride=10, cstride=10)
+# surf = ax.plot_trisurf(net_node_x, net_node_y, net_node_z, triangles=tri.triangles,
+#                 color='#0fff0f80',edgecolors='#08ff0880',linewidths=0.5, antialiased=True)
 ax.set_xlim(-scenario_len/2, scenario_len/2)
 ax.set_ylim(-scenario_wid/2, scenario_wid/2)
 ax.set_zlim(-scenario_height, 2)
@@ -241,10 +242,10 @@ is_obs = obs_check(xv, yv, zv, net_node, 1)
 #                 ax.scatter3D(xv[j][k][i], yv[j][k][i], zv[j][k][i], s=20, color='#ff9999ff', marker='o')
 
 
-start_idx = (7, 10, 6)
-end_idx = (12, 13, 6)
-print(xv[start_idx], yv[start_idx], zv[start_idx])
-print(xv[end_idx], yv[end_idx], zv[end_idx])
+start_idx = (0, 10, 6)
+end_idx = (12, 13, 4)
+# print(xv[start_idx], yv[start_idx], zv[start_idx])
+# print(xv[end_idx], yv[end_idx], zv[end_idx])
 
 
 if all(x >= y for x, y in zip(start_idx, (0,0,0))) and \
@@ -261,14 +262,22 @@ else:
 final_path = A_star_search(start_idx, end_idx, nx, ny, nz, xv, yv, zv, is_obs)
 
 if final_path is not None:
-    node_x = []
-    node_y = []
-    node_z = []
+    node_x,node_y,node_z=[], [], []
     for node in final_path:
         # print((node))
         node_x.append(xv[node])
         node_y.append(yv[node])
         node_z.append(zv[node])
-    ax.plot(node_x, node_y, node_z, color='r')
-
+    node_x=np.array(node_x)
+    node_y=np.array(node_y)
+    node_z=np.array(node_z)
+    tck, u = interpolate.splprep([node_x, node_y, node_z], s=2)
+    x_knots, y_knots, z_knots = interpolate.splev(tck[0], tck)
+    u_fine = np.linspace(0,1,30)
+    x_fine, y_fine, z_fine = interpolate.splev(u_fine, tck)
+    print(x_fine)
+    print(node_x)
+    ax.plot(x_fine, y_fine, z_fine, color='r')
+    # ax.plot(x_knots, y_knots, z_knots, color='b')
+    # ax.plot(node_x, node_y, node_z, color='g')
 plt.show()

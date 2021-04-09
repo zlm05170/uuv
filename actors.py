@@ -1,10 +1,13 @@
+import re
 from matplotlib.colors import PowerNorm
+from matplotlib.pyplot import cla, step
 from shapely.geometry.base import EMPTY
 from math_util import *
 import numpy as np
 from typing import List
 import random
 from itertools import product
+from scipy import interpolate
 
 class Actor:
 
@@ -336,17 +339,56 @@ class WayPointPlanner(Actor): #
             self.a_star_search_needed = False
         else:
             self.a_star_search_needed = True
+    @staticmethod
+    def interpolate_fun(path, num):
+        node_x,node_y,node_z=[],[],[]
+        curve_path = []
+        for node in path:
+            # print((node))
+            node_x.append(node[0])
+            node_y.append(node[1])
+            node_z.append(node[2])
+        node_x=np.array(node_x)
+        node_y=np.array(node_y)
+        node_z=np.array(node_z)
+        
+        tck, u = interpolate.splprep([node_x, node_y, node_z], s=2)
+        x_knots, y_knots, z_knots = interpolate.splev(tck[0], tck)
+        u_fine = np.linspace(0,1,num)
+        x_fine, y_fine, z_fine = interpolate.splev(u_fine, tck)
+        for i in range(len(x_fine)):
+            curve_path.append([x_fine[i],y_fine[i], z_fine[i]])
+        return curve_path
 
     def update(self, dt, t):
         super().update(dt, t)
         xv, yv, zv = self.fishnet_space_mesh_data[0], self.fishnet_space_mesh_data[1], self.fishnet_space_mesh_data[2]
         self.search_decision()
+        final_path_ini = []
         if self.a_star_search_needed:
             final_path_index = self.a_star_search()
             for node in final_path_index:
-                self.final_path.append([xv[node],yv[node],zv[node]])
+                final_path_ini.append([xv[node],yv[node],zv[node]])
+            self.final_path = WayPointPlanner.interpolate_fun(final_path_ini, num=30) # number of interpolate number
             print(self.final_path)
+
         
     def cleanup(self):
         pass
+
+
+# class HelixPlanner(Actor):
+#     def __init__(self, parent: 'Actor', pose: 'Pose'):
+#         super().__init__(parent=parent, pose=pose)
+#         self.final_path = []
+    
+#     def update(self, dt, t):
+#         return super().update(dt, t)
+#         step = np.linspace(0, 10*np.pi, 50) 
+#         x = np.sin(step)
+#         y = np.cos(step)
+#         z = -step
+#         self.final_path = np.concatenate([[x],[y],[z]])
+#         print(self.final_path)
+
 
