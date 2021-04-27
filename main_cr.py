@@ -1,4 +1,4 @@
-from surface_vessel import SurfaceVessel
+from asv_cr import SurfaceVessel_CR
 from actors import *
 from animation_3d import *
 import matplotlib.pyplot as plt
@@ -19,9 +19,9 @@ if __name__ == '__main__':
     #%%
     # Define objects in the scene
     scene = {}
-    scene.update(ship_a = SurfaceVessel(pose=Pose(position=[0.0,0.0,0.0]),ship_length=10, speed = 10.0, scene=scene))
-    scene.update(ship_b = SurfaceVessel(pose=Pose(position=[1.5,0.5,300.0]),ship_length=20, speed = 15.0, scene=scene))
-    scene.update(ship_c = SurfaceVessel(pose=Pose(position=[-1.5,0.5,100.0]),ship_length=30,speed=20,scene=scene))
+    scene.update(ship_a = SurfaceVessel_CR(pose=Pose(position=[0.0,0.0,0.0]),ship_length=10, speed = 10.0, scene=scene))
+    scene.update(ship_b = SurfaceVessel_CR(pose=Pose(position=[1.5,0.5,300.0]),ship_length=20, speed = 15.0, scene=scene))
+    scene.update(ship_c = SurfaceVessel_CR(pose=Pose(position=[-1.5,0.5,100.0]),ship_length=30,speed= 20,scene=scene))
     pose_series_a = [] 
     pose_series_b = []
     pose_series_c = []
@@ -50,7 +50,7 @@ if __name__ == '__main__':
         for key, scene_object in scene.items():
             if isinstance(scene_object, Actor):
                 scene_object.cleanup()
-
+       
         ab_cr = scene['ship_a'].aware_cr_dict['ship_b']
         ac_cr = scene['ship_a'].aware_cr_dict['ship_c']
         if ab_cr is None:
@@ -62,12 +62,9 @@ if __name__ == '__main__':
         if  (t > stop_time):
             simulation_is_running = False
     fig, (ax1,ax2) = plt.subplots(1,2,sharey=True)
+    print(ship_ab_cr_series)
     ax1.plot(np.arange(0,stop_time,dt), ship_ab_cr_series)
     ax2.plot(np.arange(0,stop_time,dt), ship_ac_cr_series)
-    # ax1.plot(np.arange(0,stop_time,dt), pose_series_a)
-    # ax2.plot(np.arange(0,stop_time,dt), pose_series_b)
-    # ax1.set_title('CR for ab')
-    # ax2.set_title('CR for ac')
     plt.show()
 
 

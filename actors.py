@@ -1,13 +1,16 @@
+import random
 import re
+from itertools import product
+from typing import List
+
+import numpy as np
 from matplotlib.colors import PowerNorm
 from matplotlib.pyplot import cla, step
-from shapely.geometry.base import EMPTY
-from math_util import *
-import numpy as np
-from typing import List
-import random
-from itertools import product
 from scipy import interpolate
+from shapely.geometry.base import EMPTY
+
+from math_util import *
+
 
 class Actor:
 

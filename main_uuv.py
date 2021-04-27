@@ -95,9 +95,10 @@ if __name__ == '__main__':
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     print(scene['planner'].final_path)
+    print(pose_series)
 
     uuv_box = get_box(uuv_length, uuv_radius, uuv_radius, 5)
-    uuv_anime = animate_motion(fig, ax, pose_series, uuv_box, 80, 80, 80, dt)
+    uuv_anime = animate_motion_3d(fig, ax, pose_series, uuv_box, 80, 80, 80, dt)
     # fishnet_surf = draw_static_surf(fig, ax, scene['fishnet'].net_mesh, scene['fishnet'].net_tri)
     # fishnet_obs = draw_obs_point(fig, ax, start, goal, scene['fishnet'].space_mesh_data, scene['fishnet'].net_obstacle_points)
     find_path = draw_find_path(fig, ax, scene['planner'].final_path)

@@ -63,7 +63,7 @@ def draw_find_path(fig, ax, waypoint_series):
             node_z.append(node[2])
         ax.plot(node_x, node_y, node_z, color='r')
     
-def animate_motion(fig, ax, pose_series, shape, space_x, space_y, space_z, dt):
+def animate_motion_3d(fig, ax, pose_series, shape, space_x, space_y, space_z, dt):
 
     # Attaching 3D axis to the figure
     line, = ax.plot([], [], [], '-')
@@ -86,4 +86,15 @@ def animate_motion(fig, ax, pose_series, shape, space_x, space_y, space_z, dt):
     ax.view_init(25, 10)
 
     return animation.FuncAnimation(fig, draw_motion, iterations, fargs=(pose_series, line, shape), interval=1000.0*dt, blit=False, repeat=True)
+
+def animate_motion_2d(fig, ax, pose_series, shape, space_x, space_y, dt):
+    return None
+
+def draw_vo_trajectory(fig, ax, pose_series):
+    node_x = []
+    node_y = []
+    for node in pose_series:
+        node_x.append(node[0])
+        node_y.append(node[1])
+    ax.plot(node_x, node_y, color='r')
 
