@@ -87,8 +87,39 @@ def animate_motion_3d(fig, ax, pose_series, shape, space_x, space_y, space_z, dt
 
     return animation.FuncAnimation(fig, draw_motion, iterations, fargs=(pose_series, line, shape), interval=1000.0*dt, blit=False, repeat=True)
 
-def animate_motion_2d(fig, ax, pose_series, shape, space_x, space_y, dt):
-    return None
+def animate_motion_2d(fig, ax, pose_series_a,pose_series_b,pose_series_c,pose_series_d, space_x, space_y, dt):
+    ax.set_xlim([0, space_x])
+    ax.set_ylim([0, space_y])
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    
+    line_1, = ax.plot([],[],'_')
+    line_2, = ax.plot([],[],'_')
+    line_3, = ax.plot([],[],'_')
+    line_4, = ax.plot([],[],'_')
+
+    frames = len(pose_series_a[:,0])
+
+    return animation.FuncAnimation(fig, func, frames, fargs=(pose_series_a,pose_series_b,pose_series_c,pose_series_d,line_1,line_2,line_3,line_4), interval=1000.0*dt, blit=False, repeat=True)
+
+def func(i, pose_series_a,pose_series_b,pose_series_c,pose_series_d,line_1,line_2,line_3,line_4): 
+    x_a = pose_series_a[:,0]
+    y_a = pose_series_a[:,1]  
+    x_b = pose_series_b[:,0]
+    y_b = pose_series_b[:,1] 
+    x_c = pose_series_c[:,0]
+    y_c = pose_series_c[:,1] 
+    x_d = pose_series_d[:,0]
+    y_d = pose_series_d[:,1] 
+
+    line_1.set_xdata(x_a[:i])
+    line_1.set_ydata(y_a[:i])
+    line_2.set_xdata(x_b[:i])
+    line_2.set_ydata(y_b[:i])
+    line_3.set_xdata(x_c[:i])
+    line_3.set_ydata(y_c[:i])
+    line_4.set_xdata(x_d[:i])
+    line_4.set_ydata(y_d[:i])
 
 def draw_vo_trajectory(fig, ax, pose_series):
     node_x = []
@@ -97,4 +128,3 @@ def draw_vo_trajectory(fig, ax, pose_series):
         node_x.append(node[0])
         node_y.append(node[1])
     ax.plot(node_x, node_y, color='r')
-

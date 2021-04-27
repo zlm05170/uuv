@@ -7,7 +7,7 @@ import numpy as np
 from matplotlib.colors import PowerNorm
 from matplotlib.pyplot import cla, step
 from scipy import interpolate
-from shapely.geometry.base import EMPTY
+# from shapely.geometry.base import EMPTY
 
 from math_util import *
 

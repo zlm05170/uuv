@@ -28,14 +28,13 @@ class SurfaceVessel_VO(Actor):
     def compute_v_des(self):
         dis_ship_goal = np.linalg.norm(self.goal-self.pose.position[:2])
         v = self.v_max * (self.goal - self.pose.position[:2])/dis_ship_goal
-        if dis_ship_goal < 1.0:
+        if dis_ship_goal < 0.5:
             v = [0, 0]
         return v
 
     def communicate(self): # it has two mission: calculate the desired velocity; sesearch the ts
         super().communicate()
         self.aware_dict.clear()
-        self.v_des = self.compute_v_des()
         for key, scene_object in self.scene_ref.items():
             if isinstance(scene_object, SurfaceVessel_VO):
                 if scene_object is not self:
@@ -91,8 +90,8 @@ class SurfaceVessel_VO(Actor):
         ###
         ### Second, check the other available zone    
         for i in np.arange(0, 2*pi, 0.1):
-            for j in np.arange(0, v_des_norm, v_des_norm/1.0):
-                temp_v = [j*cos(i), j*sin(i)]
+            for j in np.arange(1.0, v_des_norm+v_des_norm/5, v_des_norm/5):
+                temp_v = [j*cos(i), j*sin(i)]                
                 is_assessible = True
                 for RVO_os_ts in RVO_os_ts_ls:
                     diff = [temp_v[0] + p_a[0] -RVO_os_ts[0][0], temp_v[1]+p_a[1]-RVO_os_ts[0][1]]
@@ -109,7 +108,6 @@ class SurfaceVessel_VO(Actor):
         ###
         if accessible_v:
             v_a = min(accessible_v, key= lambda v: np.linalg.norm(v - v_des))
-        
         # elif inaccessible_v:
         #     tc_v = dict()
         #     for inacc_v in inaccessible_v:
@@ -162,7 +160,13 @@ class SurfaceVessel_VO(Actor):
 
     def update(self, dt, t):
         super().update(dt, t)
-        self.v = self.RVO_update(self.aware_dict)              
-        self.pose.position[0:2] += np.array(self.v) * dt
+        dis_ship_goal = np.linalg.norm(self.goal-self.pose.position[:2])
+        if dis_ship_goal < 0.5:
+            pass
+        else:
+            self.v_des = self.compute_v_des()
+            self.v = self.RVO_update(self.aware_dict)              
+            self.pose.position[0:2] += np.array(self.v) * dt
+
 
     
